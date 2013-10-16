@@ -58,13 +58,14 @@ fi
 
 
 #open X11vnc and forward it to display :0 on remote machine
-ssh -f -L 5900:localhost:5900 $user@$host 'x11vnc -ncache 10 -noxdamage -display :0 --auth guess -dp' 
+ssh -f -L 5900:localhost:5900 $user@$host 'x11vnc -ncache 10 -noxdamage -display :0 --auth guess -dp; a=$?;export $a' 
+
+if [ ! $? -eq 0 ] ; then 
+	echo "error to connect, check remote machine $host if has it X11nvc and tightvnc "
+	exit 1
+fi
 
 # open vncviewer on local machine
 vncviewer localhost:0 -encodings "copyrect tight zrle hextile" & >/dev/null
-
-if [ $? = 1 ] ; then 
-	echo "error to connect, check remote machine $host if has it X11nvc and tightvnc "
-fi
 
 exit 0
