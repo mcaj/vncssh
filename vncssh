@@ -1,0 +1,70 @@
+#!/bin/bash
+
+# Licence :
+#   This program is free software; you can redistribute it and/or modify
+#   it under the terms of the GNU General Public License as published by
+#   the Free Software Foundation; either version 2 of the License, or
+#   (at your option) any later version.
+#
+#   This program is distributed in the hope that it will be useful,
+#   but WITHOUT ANY WARRANTY; without even the implied warranty of
+#   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#   GNU General Public License for more details.
+#
+#   You should have received a copy of the GNU General Public License
+#   along with this program; if not, write to the Free Software
+#   Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+# 
+
+# About it:
+#
+# VNC via SSH ;)
+# you need to know user password and he can watch your work on his desktop.
+# on the remote machine you need x11vnc with tightvnc installed.
+#
+# Martin Caj <mcaj@suse.cz>
+#
+
+# version 0.1
+
+
+function usage() {
+        echo
+	        echo "This script will control remote X screen on the machine" 
+		echo "via ssh. On the renmote host you need to has x11vnc "
+		echo "with tightvnc installed."
+		echo "Usage:"
+		echo "		vncssh \$username@\$remotemachine"
+
+		exit 0
+}	
+
+if [ ! "$1" ] ; then
+	    usage 1
+fi
+
+if [ "$2" ] ; then
+	    usage 1
+fi
+
+user=$(echo $1 | awk -F'@' '{print $1}' )
+host=$(echo $1 | awk -F'@' '{print $2}' )
+
+if [ $(echo $1 | awk -F'@' '{print $3}' ) ] ; then
+	echo "Error to many @ in $1 ! "
+	exit 1
+fi
+
+
+
+#open X11vnc and forward it to display :0 on remote machine
+ssh -f -L 5900:localhost:5900 $user@$host 'x11vnc -ncache 10 -noxdamage -display :0 --auth guess -dp' 
+
+# open vncviewer on local machine
+vncviewer localhost:0 -encodings "copyrect tight zrle hextile" & >/dev/null
+
+if [ $? = 1 ] ; then 
+	echo "error to connect, check remote machine $host if has it X11nvc and tightvnc "
+fi
+
+exit 0
