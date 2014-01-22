@@ -31,7 +31,7 @@
 function usage() {
         echo
 	        echo "This script will control remote X screen on the machine" 
-		echo "via ssh. On the renmote host you need to has x11vnc "
+		echo "via ssh. On the remote host you need to has x11vnc "
 		echo "with tightvnc installed."
 		echo "Usage:"
 		echo "		vncssh \$username@\$remotemachine"
@@ -56,9 +56,8 @@ if [ $(echo $1 | awk -F'@' '{print $3}' ) ] ; then
 fi
 
 
-
 #open X11vnc and forward it to display :0 on remote machine
-ssh -f -L 5900:localhost:5900 $user@$host 'x11vnc -ncache 10 -noxdamage -display :0 --auth guess -dp; a=$?;export $a' 
+ssh -f -L 5900:localhost:5900 $user@$host 'if $(ps fax|grep vnc|grep -v grep) ; then exit 0; else ;x11vnc -ncache 10 -noxdamage -display :0 --auth guess -dp; fi' 
 
 if [ ! $? -eq 0 ] ; then 
 	echo "error to connect, check remote machine $host if has it X11nvc and tightvnc "
